@@ -19,24 +19,6 @@ echo -e "$Cyan \n Updating System.. $Color_Off"
 sudo apt-get update -y && sudo apt-get upgrade -y
 
 sudo apt install nginx -y
-#  configure firewall
-echo -e "$Cyan \n backup ufw rules to file /root/rules.ufw $Color_Off"
-sudo sed '/RULES/,/END RULES/!d' /etc/ufw/user{,6}.rules >> ~/rules.ufw_before
-
-echo -e "$Cyan \n showing ufw rules $Color_Off"
-sudo ufw status >> ~/status.ufw_before
-sudo ufw status
-
-echo -e "$Cyan \n enabling ufw to ssh incase connection goes down $Color_Off"
-sudo ufw allow ssh && sudo ufw enable
-sudo ufw allow 'Nginx HTTP'
-
-echo -e "$Cyan \n showing ufw rules $Color_Off"
-sudo ufw status
-
-echo -e "$Cyan \n checking nginx is running now $Color_Off"
-
-curl http://localhost
 
 echo -e "$Cyan \n installing MySQL server and client  $Color_Off"
 
@@ -53,10 +35,55 @@ sudo mysql_secure_installation
 echo -e "$Cyan \n installing php-fpm and php-mysql   $Color_Off"
 
 sudo add-apt-repository universe -y
-sudo apt install php-fpm php-mysql
+sudo apt install php-fpm php-mysql -y
 
 # to install specifc version goes to this toutorial
+# https://www.linuxbabe.com/ubuntu/install-lemp-stack-nginx-mariadb-php7-2-ubuntu-18-04-lts
+
+echo -e "$Cyan \n enable nginx in boot $Color_Off"
+
+sudo systemctl enable nginx
+
+echo -e "$Cyan \n checking nginx is running now $Color_Off"
+
+curl http://localhost
 
 
+# Create info.php for testing php processing
+echo -e "$Cyan \n Create info.php for testing php processing $Color_Off"
+sudo echo "<?php phpinfo(); ?>" > /var/www/html/info.php
+
+
+echo -e "$Cyan \n restart nginx $Color_Off"
+
+sudo systemctl start nginx
+
+# Verify LAMP Installation
+echo -e "$Cyan \nVerify LAMP Installation ,checking php serving $Color_Off"
+
+curl http://localhost/info.php | grep head
+ipadd=`ip addr show eth0 | grep inet | awk '{ print $2; }'|head -1 | sed 's/\/.*$//'`
+
+echo "you can test on http://$ipadd/info.php"
+
+
+#  configure firewall
+
+echo -e "$Cyan \n showing ufw rules $Color_Off"
+sudo ufw status
+
+echo -e "$Cyan \n backup ufw rules to file /root/rules.ufw $Color_Off"
+sudo sed '/RULES/,/END RULES/!d' /etc/ufw/user{,6}.rules >> ~/rules.ufw_before
+
+echo -e "$Cyan \n showing ufw rules $Color_Off"
+sudo ufw status >> ~/status.ufw_before
+sudo ufw status
+
+echo -e "$Cyan \n enabling ufw to ssh incase connection goes down $Color_Off"
+sudo ufw allow 'Nginx HTTP'
+
+echo -e "$Cyan \n please check ufw rules my you need to run below $Color_Off"
+
+echo "sudo ufw allow ssh && sudo ufw enable"
 
 
