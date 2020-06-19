@@ -48,6 +48,17 @@ echo -e "$Cyan \n checking nginx is running now $Color_Off"
 
 curl http://localhost
 
+# create example.com
+
+curl -fsSL https://raw.githubusercontent.com/Pishoy/automated_scripts/master/example.com >> /etc/nginx/sites-available/example.com
+sudo unlink /etc/nginx/sites-enabled/default
+# if you need to restore default file
+# sudo ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/
+
+echo -e "$Cyan \n checking nginx config $Color_Off"
+
+sudo nginx -t
+sudo systemctl reload nginx
 
 # Create info.php for testing php processing
 echo -e "$Cyan \n Create info.php for testing php processing $Color_Off"
